@@ -62,7 +62,10 @@ using namespace std;
 int main(int argc, char **argv) {
 
   try {
+    //解析命令行参数
     CMDLine cmdline(argc, argv);
+    
+    //输出版本信息
     std::cout << "----------------------------------------------------------------------------" << std::endl;
     std::cout << "libFM" << std::endl;
     std::cout << "  Version: 1.4.4" << std::endl;
@@ -73,6 +76,7 @@ int main(int argc, char **argv) {
     std::cout << "conditions; for details see license.txt." << std::endl;
     std::cout << "----------------------------------------------------------------------------" << std::endl;
 
+    //解析参数为变量
     const std::string param_task       = cmdline.registerParameter("task", "r=regression, c=binary classification [MANDATORY]");
     const std::string param_meta_file  = cmdline.registerParameter("meta", "filename for meta information about data set");
     const std::string param_train_file = cmdline.registerParameter("train", "filename for training data [MANDATORY]");
@@ -105,6 +109,7 @@ int main(int argc, char **argv) {
     const std::string param_do_multilevel  = "do_multilevel";
     const std::string param_num_eval_cases  = "num_eval_cases";
 
+    //解析输出help参数
     if (cmdline.hasParameter(param_help) || (argc == 1)) {
       cmdline.print_help();
       return 0;
@@ -140,12 +145,14 @@ int main(int argc, char **argv) {
 
     // (1) Load the data
     std::cout << "Loading train...\t" << std::endl;
+    //data的实现？
     Data train(
       cmdline.getValue(param_cache_size, 0),
       ! (!cmdline.getValue(param_method).compare("mcmc")), // no original data for mcmc
       ! (!cmdline.getValue(param_method).compare("sgd") || !cmdline.getValue(param_method).compare("sgda")) // no transpose data for sgd, sgda
     );
     train.load(cmdline.getValue(param_train_file));
+    //debug信息在load后输出，说明load已生成了信息，只是未输出而已？ 分析debug的使用方式
     if (cmdline.getValue(param_verbosity, 0) > 0) { train.debug(); }
 
     std::cout << "Loading test... \t" << std::endl;
@@ -173,6 +180,7 @@ int main(int argc, char **argv) {
       }
     }
 
+    // relational是什么阶段？
     DVector<RelationData*> relation;
     // (1.2) Load relational data
     {
@@ -196,6 +204,7 @@ int main(int argc, char **argv) {
       }
     }
 
+    //meta是什么数据？
     // (1.3) Load meta data
     std::cout << "Loading meta data...\t" << std::endl;
 
@@ -209,6 +218,7 @@ int main(int argc, char **argv) {
       meta_main.loadGroupsFromFile(cmdline.getValue(param_meta_file));
     }
 
+    //一下是执行内容的作用？
     // build the joined meta table
     for (uint r = 0; r < train.relation.dim; r++) {
       train.relation(r).data->attr_offset = num_all_attribute;
